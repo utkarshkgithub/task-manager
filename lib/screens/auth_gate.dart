@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/task_bloc.dart';
 import '../services/auth_service.dart';
 import '../services/quote_service.dart';
 import '../services/task_service.dart';
@@ -48,10 +50,15 @@ class AuthGate extends StatelessWidget {
           return LoginScreen(authService: authService);
         }
 
-        return HomeScreen(
-          authService: authService,
-          taskService: taskService,
-          quoteService: quoteService,
+        return BlocProvider(
+          create: (_) =>
+              TaskBloc(taskService: taskService)
+                ..add(TaskSubscriptionRequested(user.uid)),
+          child: HomeScreen(
+            authService: authService,
+            taskService: taskService,
+            quoteService: quoteService,
+          ),
         );
       },
     );

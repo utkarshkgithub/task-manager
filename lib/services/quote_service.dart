@@ -23,7 +23,7 @@ class MotivationalQuote {
 class QuoteService {
   Future<MotivationalQuote> fetchQuote() async {
     final response = await http
-        .get(Uri.parse('https://api.quotable.io/random'))
+        .get(Uri.parse('http://api.quotable.io/random'))
         .timeout(const Duration(seconds: 12));
 
     if (response.statusCode != 200) {

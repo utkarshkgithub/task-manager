@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/task_bloc.dart';
 import '../models/task_item.dart';
 import '../services/auth_service.dart';
 import '../services/quote_service.dart';
@@ -61,20 +63,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _toggleTask(TaskItem task, bool completed) async {
-    final user = widget.authService.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    try {
-      await widget.taskService.setCompleted(user.uid, task.id, completed);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to update the task right now.')),
-      );
-    }
+  void _toggleTask(TaskItem task, bool completed) {
+    context.read<TaskBloc>().add(
+      TaskCompletedRequested(taskId: task.id, completed: completed),
+    );
   }
 
   Future<void> _deleteTask(TaskItem task) async {
@@ -107,14 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    try {
-      await widget.taskService.deleteTask(user.uid, task.id);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to delete the task right now.')),
-      );
-    }
+    if (!mounted) return;
+
+    context.read<TaskBloc>().add(TaskDeletedRequested(task.id));
   }
 
   @override
@@ -139,10 +126,23 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: SafeArea(
-          child: StreamBuilder<List<TaskItem>>(
-            stream: widget.taskService.watchTasks(user.uid),
-            builder: (context, taskSnapshot) {
-              final tasks = taskSnapshot.data ?? const <TaskItem>[];
+          child: BlocConsumer<TaskBloc, TaskState>(
+            listenWhen: (previous, current) =>
+                previous.errorMessage != current.errorMessage &&
+                current.errorMessage != null &&
+                current.loadStatus == TaskLoadStatus.loaded,
+            listener: (context, state) {
+              final message = state.errorMessage;
+              if (message == null) {
+                return;
+              }
+
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(message)));
+            },
+            builder: (context, taskState) {
+              final tasks = taskState.tasks;
               final completedCount = tasks
                   .where((task) => task.completed)
                   .length;
@@ -204,23 +204,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
-                        if (taskSnapshot.hasError)
+                        if (taskState.loadStatus == TaskLoadStatus.failure &&
+                            tasks.isEmpty)
                           TextButton.icon(
-                            onPressed: () => setState(() {}),
+                            onPressed: () => context.read<TaskBloc>().add(
+                              TaskSubscriptionRequested(user.uid),
+                            ),
                             icon: const Icon(Icons.refresh),
                             label: const Text('Retry'),
                           ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if (taskSnapshot.hasError)
+                    if (taskState.loadStatus == TaskLoadStatus.failure &&
+                        tasks.isEmpty)
                       _ErrorCard(
-                        message: 'Unable to load tasks right now.',
+                        message:
+                            taskState.errorMessage ??
+                            'Unable to load tasks right now.',
                         actionLabel: 'Try again',
-                        onAction: () => setState(() {}),
+                        onAction: () => context.read<TaskBloc>().add(
+                          TaskSubscriptionRequested(user.uid),
+                        ),
                       )
-                    else if (taskSnapshot.connectionState ==
-                            ConnectionState.waiting &&
+                    else if ((taskState.loadStatus == TaskLoadStatus.loading ||
+                            taskState.loadStatus == TaskLoadStatus.initial) &&
                         tasks.isEmpty)
                       const _LoadingTasksCard()
                     else if (tasks.isEmpty)

@@ -6,10 +6,16 @@ import 'screens/auth_gate.dart';
 import 'services/auth_service.dart';
 import 'services/quote_service.dart';
 import 'services/task_service.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await SystemChrome.setPreferredOrientations([
+    // DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown, // optional
+  ]);
 
   runApp(
     TaskManagerApp(
