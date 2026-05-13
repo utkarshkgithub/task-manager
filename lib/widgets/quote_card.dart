@@ -10,68 +10,75 @@ class QuoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [colorScheme.primary, colorScheme.tertiary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: _buildContent(context),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
       ),
+      padding: const EdgeInsets.all(20),
+      child: _buildContent(context),
     );
   }
 
   Widget _buildContent(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final isLoading = snapshot.connectionState == ConnectionState.waiting;
 
     if (isLoading) {
       return const SizedBox(
-        height: 150,
-        child: Center(child: CircularProgressIndicator(color: Colors.white)),
+        height: 100,
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFF888888),
+            ),
+          ),
+        ),
       );
     }
 
     if (snapshot.hasError || !snapshot.hasData) {
-      return SizedBox(
-        height: 150,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Daily Motivation',
-              style: textTheme.labelLarge?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontWeight: FontWeight.w700,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.format_quote_rounded,
+                size: 18,
+                color: Color(0xFF888888),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Unable to load a quote right now.',
-              style: textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+              const SizedBox(width: 6),
+              Text(
+                'Daily Motivation',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF888888),
+                  letterSpacing: 0.5,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Unable to load a quote right now.',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF333333),
             ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: onRetry,
-              style: TextButton.styleFrom(foregroundColor: Colors.white),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh, size: 16),
+            label: const Text('Try again'),
+          ),
+        ],
       );
     }
 
@@ -79,41 +86,44 @@ class QuoteCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Daily Motivation',
-          style: textTheme.labelLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.9),
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '"${quote.text}"',
-          style: textTheme.titleMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(
-              child: Text(
-                '- ${quote.author}',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.92),
-                  fontWeight: FontWeight.w600,
-                ),
+            const Icon(
+              Icons.format_quote_rounded,
+              size: 18,
+              color: Color(0xFF888888),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Daily Motivation',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF888888),
+                letterSpacing: 0.5,
               ),
             ),
-            TextButton.icon(
-              onPressed: onRetry,
-              style: TextButton.styleFrom(foregroundColor: Colors.white),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Refresh'),
-            ),
           ],
+        ),
+        const SizedBox(height: 14),
+        Text(
+          '"${quote.text}"',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1A1A1A),
+            height: 1.45,
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          '— ${quote.author}',
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF888888),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

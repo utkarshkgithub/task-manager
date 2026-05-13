@@ -57,6 +57,19 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime.now().subtract(const Duration(days: 3650)),
       lastDate: DateTime.now().add(const Duration(days: 3650)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.black,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF1A1A1A),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -115,112 +128,140 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit task' : 'Add task')),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF8FAFC), Color(0xFFE8F4F1)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit task' : 'Add task'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          _isEditing
-                              ? 'Update task details'
-                              : 'New task details',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Keep the title, description, date, and status in one place.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 24),
-                        AppTextField(
-                          controller: _titleController,
-                          labelText: 'Title',
-                          hintText: 'Prepare sprint review',
-                          prefixIcon: const Icon(Icons.title_rounded),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Title is required.';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        AppTextField(
-                          controller: _descriptionController,
-                          labelText: 'Description',
-                          hintText: 'Describe the work that needs to be done.',
-                          prefixIcon: const Icon(Icons.notes_rounded),
-                          maxLines: 4,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Description is required.';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Date',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: _pickDate,
-                          icon: const Icon(Icons.event_rounded),
-                          label: Text(
-                            MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(_selectedDate),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE5E5E5)),
+                ),
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              _isEditing
+                                  ? Icons.edit_outlined
+                                  : Icons.add_task_outlined,
+                              color: const Color(0xFF1A1A1A),
+                              size: 22,
+                            ),
                           ),
+                          const SizedBox(width: 16),
+                          Text(
+                            _isEditing
+                                ? 'Update task details'
+                                : 'New task details',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.5,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Keep the title, description, date, and status in one place.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF888888),
                         ),
-                        const SizedBox(height: 16),
-                        SwitchListTile.adaptive(
-                          value: _completed,
-                          onChanged: (value) {
-                            setState(() {
-                              _completed = value;
-                            });
-                          },
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Mark as completed'),
-                          subtitle: Text(_completed ? 'Completed' : 'Pending'),
+                      ),
+                      const SizedBox(height: 24),
+                      AppTextField(
+                        controller: _titleController,
+                        labelText: 'Title',
+                        hintText: 'Prepare sprint review',
+                        prefixIcon: const Icon(Icons.title_rounded),
+                        textInputAction: TextInputAction.next,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Title is required.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      AppTextField(
+                        controller: _descriptionController,
+                        labelText: 'Description',
+                        hintText: 'Describe the work that needs to be done.',
+                        prefixIcon: const Icon(Icons.notes_rounded),
+                        maxLines: 4,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Description is required.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Date picker ──
+                      const Text(
+                        'Date',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1A1A1A),
                         ),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: _isSaving ? null : _saveTask,
-                          child: _isSaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(_isEditing ? 'Update task' : 'Save task'),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: _pickDate,
+                        icon: const Icon(Icons.event_outlined, size: 18),
+                        label: Text(
+                          MaterialLocalizations.of(
+                            context,
+                          ).formatMediumDate(_selectedDate),
                         ),
-                      ],
-                    ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // ── Save button ──
+                      FilledButton(
+                        onPressed: _isSaving ? null : _saveTask,
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(_isEditing ? 'Update task' : 'Save task'),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -15,9 +15,9 @@ class ProfileScreen extends StatelessWidget {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Signed out successfully.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Signed out successfully.')));
   }
 
   String _formatDate(DateTime? dateTime) {
@@ -46,63 +46,16 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        displayName.characters.first.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Account overview',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            user.email ?? 'No email available',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.72),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              CircleAvatar(
+                radius: 52,
+                backgroundColor: Colors.black,
+                child: Icon(Icons.person, color: Colors.grey,size: 54,)
               ),
               const SizedBox(height: 20),
               _InfoSection(
@@ -110,7 +63,6 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   _InfoRow(label: 'Display name', value: displayName),
                   _InfoRow(label: 'Email', value: user.email ?? 'Not set'),
-                  _InfoRow(label: 'User ID', value: user.uid),
                 ],
               ),
               const SizedBox(height: 16),
@@ -124,20 +76,6 @@ class ProfileScreen extends StatelessWidget {
                   _InfoRow(
                     label: 'Created',
                     value: _formatDate(user.metadata.creationTime),
-                  ),
-                  _InfoRow(
-                    label: 'Last sign-in',
-                    value: _formatDate(user.metadata.lastSignInTime),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _InfoSection(
-                title: 'Providers',
-                children: [
-                  _InfoRow(
-                    label: 'Linked sign-in methods',
-                    value: providerIds.isEmpty ? 'None' : providerIds.join(', '),
                   ),
                 ],
               ),

@@ -19,8 +19,6 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
     final completed = task.completed;
     final dateLabel = DateFormat('EEE, d MMM yyyy').format(task.date);
 
@@ -30,21 +28,22 @@ class TaskCard extends StatelessWidget {
       background: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F7B4C),
-          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, color: Colors.white),
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
             SizedBox(width: 8),
             Text(
               'Mark completed',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
           ],
@@ -53,113 +52,129 @@ class TaskCard extends StatelessWidget {
       secondaryBackground: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFB45309),
-          borderRadius: BorderRadius.circular(20),
+          color: const Color.fromARGB(255, 165, 165, 165),
+          borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Icon(Icons.cancel_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 8),
             Text(
-              'Use checkbox or menu',
+              'Mark Pending',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.more_horiz, color: Colors.white),
+            SizedBox(width: 2),
           ],
         ),
       ),
       confirmDismiss: (direction) async {
-        if (task.completed || direction != DismissDirection.startToEnd) {
+        if (direction == DismissDirection.startToEnd && !task.completed) {
+          onToggleCompleted(true);
           return false;
         }
-        
-        onToggleCompleted(true);
+
+        if (direction == DismissDirection.endToStart && task.completed) {
+          onToggleCompleted(false);
+          return false;
+        }
+
         return false;
       },
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Checkbox(
-                value: completed,
-                onChanged: (value) {
-                  if (value != null) {
-                    onToggleCompleted(value);
-                  }
-                },
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task.title,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        decoration: completed
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                        color: completed ? Colors.black54 : Colors.black87,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: completed
+                ? const Color(0xFFE5E5E5)
+                : const Color(0xFFE5E5E5),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(
+              value: completed,
+              onChanged: (value) {
+                if (value != null) {
+                  onToggleCompleted(value);
+                }
+              },
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    task.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      decoration: completed
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      color: completed
+                          ? const Color(0xFF888888)
+                          : const Color(0xFF1A1A1A),
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    task.description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: completed
+                          ? const Color(0xFF888888)
+                          : const Color(0xFF333333),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _InfoChip(icon: Icons.event_outlined, label: dateLabel),
+                      _InfoChip(
+                        icon: completed
+                            ? Icons.check_circle_outline
+                            : Icons.schedule_outlined,
+                        label: task.status,
+                        filled: completed,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      task.description,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _InfoChip(
-                          icon: Icons.event,
-                          label: dateLabel,
-                          backgroundColor: const Color(0xFFEFF6F5),
-                          foregroundColor: scheme.primary,
-                        ),
-                        _InfoChip(
-                          icon: completed
-                              ? Icons.check_circle
-                              : Icons.timelapse,
-                          label: task.status,
-                          backgroundColor: completed
-                              ? const Color(0xFFEAF7EF)
-                              : const Color(0xFFFFF3E2),
-                          foregroundColor: completed
-                              ? const Color(0xFF0F7B4C)
-                              : const Color(0xFFB45309),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit();
-                  } else if (value == 'delete') {
-                    onDelete();
-                  }
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'edit') {
+                  onEdit();
+                } else if (value == 'delete') {
+                  onDelete();
+                }
+              },
+              icon: const Icon(
+                Icons.more_vert,
+                size: 20,
+                color: Color(0xFF888888),
+              ),
+              itemBuilder: (context) => const [
+                PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -170,33 +185,37 @@ class _InfoChip extends StatelessWidget {
   const _InfoChip({
     required this.icon,
     required this.label,
-    required this.backgroundColor,
-    required this.foregroundColor,
+    this.filled = false,
   });
 
   final IconData icon;
   final String label;
-  final Color backgroundColor;
-  final Color foregroundColor;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
+        color: filled ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(8),
+        border: filled ? null : Border.all(color: const Color(0xFFE5E5E5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: foregroundColor),
-          const SizedBox(width: 6),
+          Icon(
+            icon,
+            size: 14,
+            color: filled ? Colors.white : const Color(0xFF888888),
+          ),
+          const SizedBox(width: 5),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: foregroundColor,
-              fontWeight: FontWeight.w700,
+            style: TextStyle(
+              fontSize: 12,
+              color: filled ? Colors.white : const Color(0xFF333333),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

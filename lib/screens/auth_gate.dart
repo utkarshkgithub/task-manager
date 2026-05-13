@@ -6,7 +6,7 @@ import '../bloc/task_bloc.dart';
 import '../services/auth_service.dart';
 import '../services/quote_service.dart';
 import '../services/task_service.dart';
-import 'home_screen.dart';
+import 'main_shell.dart';
 import 'login_screen.dart';
 
 class AuthGate extends StatelessWidget {
@@ -54,7 +54,7 @@ class AuthGate extends StatelessWidget {
           create: (_) =>
               TaskBloc(taskService: taskService)
                 ..add(TaskSubscriptionRequested(user.uid)),
-          child: HomeScreen(
+          child: MainShell(
             authService: authService,
             taskService: taskService,
             quoteService: quoteService,
@@ -70,20 +70,15 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF8FAFC), Color(0xFFE8F4F1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const Center(
-          child: SizedBox(
-            width: 44,
-            height: 44,
-            child: CircularProgressIndicator(strokeWidth: 3),
+    return const Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: Colors.black,
           ),
         ),
       ),

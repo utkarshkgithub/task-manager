@@ -112,145 +112,148 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(),
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add, size: 20),
         label: const Text('Add task'),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF8FAFC), Color(0xFFE8F4F1)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: BlocConsumer<TaskBloc, TaskState>(
-            listenWhen: (previous, current) =>
-                previous.errorMessage != current.errorMessage &&
-                current.errorMessage != null &&
-                current.loadStatus == TaskLoadStatus.loaded,
-            listener: (context, state) {
-              final message = state.errorMessage;
-              if (message == null) {
-                return;
-              }
+      body: SafeArea(
+        child: BlocConsumer<TaskBloc, TaskState>(
+          listenWhen: (previous, current) =>
+              previous.errorMessage != current.errorMessage &&
+              current.errorMessage != null &&
+              current.loadStatus == TaskLoadStatus.loaded,
+          listener: (context, state) {
+            final message = state.errorMessage;
+            if (message == null) {
+              return;
+            }
 
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(message)));
-            },
-            builder: (context, taskState) {
-              final tasks = taskState.tasks;
-              final completedCount = tasks
-                  .where((task) => task.completed)
-                  .length;
-              final pendingCount = tasks.length - completedCount;
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+          builder: (context, taskState) {
+            final tasks = taskState.tasks;
+            final completedCount = tasks.where((task) => task.completed).length;
+            final pendingCount = tasks.length - completedCount;
 
-              return RefreshIndicator(
-                onRefresh: _refreshQuote,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-                  children: [
-                    _HeaderCard(
-                      email: user.email ?? 'Signed in user',
-                      onSignOut: _signOut,
-                    ),
-                    const SizedBox(height: 20),
-                    FutureBuilder<MotivationalQuote>(
-                      future: _quoteFuture,
-                      builder: (context, quoteSnapshot) {
-                        return QuoteCard(
-                          snapshot: quoteSnapshot,
-                          onRetry: _refreshQuote,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _StatCard(
-                            label: 'Total tasks',
-                            value: tasks.length.toString(),
-                            icon: Icons.list_alt_rounded,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            label: 'Completed',
-                            value: completedCount.toString(),
-                            icon: Icons.check_circle_rounded,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _StatCard(
-                      label: 'Pending',
-                      value: pendingCount.toString(),
-                      icon: Icons.timelapse_rounded,
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Your tasks',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                        if (taskState.loadStatus == TaskLoadStatus.failure &&
-                            tasks.isEmpty)
-                          TextButton.icon(
-                            onPressed: () => context.read<TaskBloc>().add(
-                              TaskSubscriptionRequested(user.uid),
-                            ),
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Retry'),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    if (taskState.loadStatus == TaskLoadStatus.failure &&
-                        tasks.isEmpty)
-                      _ErrorCard(
-                        message:
-                            taskState.errorMessage ??
-                            'Unable to load tasks right now.',
-                        actionLabel: 'Try again',
-                        onAction: () => context.read<TaskBloc>().add(
-                          TaskSubscriptionRequested(user.uid),
-                        ),
-                      )
-                    else if ((taskState.loadStatus == TaskLoadStatus.loading ||
-                            taskState.loadStatus == TaskLoadStatus.initial) &&
-                        tasks.isEmpty)
-                      const _LoadingTasksCard()
-                    else if (tasks.isEmpty)
-                      const _EmptyStateCard()
-                    else
-                      ...tasks.map(
-                        (task) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: TaskCard(
-                            task: task,
-                            onEdit: () => _openEditor(task: task),
-                            onDelete: () => _deleteTask(task),
-                            onToggleCompleted: (value) =>
-                                _toggleTask(task, value),
-                          ),
+            return RefreshIndicator(
+              color: Colors.black,
+              backgroundColor: Colors.white,
+              onRefresh: _refreshQuote,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+                children: [
+                  // ── Header ──
+                  _HeaderCard(
+                    email: user.email ?? 'Signed in user',
+                    onSignOut: _signOut,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Quote ──
+                  FutureBuilder<MotivationalQuote>(
+                    future: _quoteFuture,
+                    builder: (context, quoteSnapshot) {
+                      return QuoteCard(
+                        snapshot: quoteSnapshot,
+                        onRetry: _refreshQuote,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          label: 'Total',
+                          value: tasks.length.toString(),
+                          // icon: Icons.layers_outlined,
                         ),
                       ),
-                  ],
-                ),
-              );
-            },
-          ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatCard(
+                          label: 'Done',
+                          value: completedCount.toString(),
+                          // icon: Icons.check_circle_outline,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatCard(
+                          label: 'Pending',
+                          value: pendingCount.toString(),
+                          // icon: Icons.schedule_outlined,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Your tasks',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                        ),
+                      ),
+                      if (taskState.loadStatus == TaskLoadStatus.failure &&
+                          tasks.isEmpty)
+                        TextButton.icon(
+                          onPressed: () => context.read<TaskBloc>().add(
+                            TaskSubscriptionRequested(user.uid),
+                          ),
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Retry'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  if (taskState.loadStatus == TaskLoadStatus.failure &&
+                      tasks.isEmpty)
+                    _ErrorCard(
+                      message:
+                          taskState.errorMessage ??
+                          'Unable to load tasks right now.',
+                      actionLabel: 'Try again',
+                      onAction: () => context.read<TaskBloc>().add(
+                        TaskSubscriptionRequested(user.uid),
+                      ),
+                    )
+                  else if ((taskState.loadStatus == TaskLoadStatus.loading ||
+                          taskState.loadStatus == TaskLoadStatus.initial) &&
+                      tasks.isEmpty)
+                    const _LoadingTasksCard()
+                  else if (tasks.isEmpty)
+                    const _EmptyStateCard()
+                  else
+                    ...tasks.map(
+                      (task) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: TaskCard(
+                          task: task,
+                          onEdit: () => _openEditor(task: task),
+                          onDelete: () => _deleteTask(task),
+                          onToggleCompleted: (value) =>
+                              _toggleTask(task, value),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -265,111 +268,82 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Icon(
-                Icons.checklist_rounded,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Task Manager',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    email,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
+            child: const Icon(
+              Icons.checklist_rounded,
+              color: Colors.white,
+              size: 22,
             ),
-            IconButton(
-              tooltip: 'Logout',
-              onPressed: onSignOut,
-              icon: const Icon(Icons.logout_rounded),
+          ),
+          const SizedBox(width: 14),
+          const Text(
+            'Task Manager',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
+  const _StatCard({required this.label, required this.value});
 
   final String label;
   final String value;
-  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
+        backgroundBlendMode: BlendMode.darken,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: -1,
+              height: 1,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    value,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  Text(
-                    label,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF888888),
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -380,43 +354,45 @@ class _EmptyStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Icon(
-                Icons.inbox_rounded,
-                size: 34,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE5E5E5)),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No tasks yet',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            child: const Icon(
+              Icons.inbox_outlined,
+              size: 26,
+              color: Color(0xFF888888),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Add your first task to start tracking deadlines and progress.',
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'No tasks yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: -0.3,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Tap "Add task" to get started.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Color(0xFF888888)),
+          ),
+        ],
       ),
     );
   }
@@ -427,10 +403,21 @@ class _LoadingTasksCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(child: CircularProgressIndicator()),
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: Colors.black,
+          ),
+        ),
       ),
     );
   }
@@ -449,26 +436,31 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A1A1A),
             ),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: onAction,
-              icon: const Icon(Icons.refresh),
-              label: Text(actionLabel),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: onAction,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: Text(actionLabel),
+          ),
+        ],
       ),
     );
   }
